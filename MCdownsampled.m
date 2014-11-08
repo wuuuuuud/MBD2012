@@ -11,24 +11,29 @@ if true || exist('initialized','var')==0 || initialized==false
     len=length(Y);
     kerlen=20;
     alpha=5000/15;
-    gamma=50000/10;
+    gamma=50000/15;
     delta=0.5e8/15;
     beta=0.5e9/15;
-    omega=1000/15;
+    omega=2000/15;
     
-    channelN=5%通道数
+    channelN=10%通道数
     
     parameters = struct();
     parameters.type = 'ConvolutionAndDownsample';
     parameters.channelNumber = channelN;
-    parameters.downsamplePhases = [1,2,3,2,4];
-    parameters.sensorKernels=normalize([1,1,1,1,1]);
-    parameters.kernels=cell(5,1);
-    parameters.kernels{1}=Gauss_1D(20);
-    parameters.kernels{2}=Gauss_1D(23);
-    parameters.kernels{3}=Gauss_1D(17);
-    parameters.kernels{4}=Gauss_1D(19);
+    parameters.downsamplePhases = [1,1,1,1,1,1,1,1,1,1];
+    parameters.sensorKernels=normalize([1,1,1,1,1,1,1,1,1,1]);
+    parameters.kernels=cell(channelN,1);
+    parameters.kernels{1}=Gauss_1D(25);
+    parameters.kernels{2}=Gauss_1D(24);
+    parameters.kernels{3}=Gauss_1D(20);
+    parameters.kernels{4}=Gauss_1D(23);
     parameters.kernels{5}=Gauss_1D(21);
+    parameters.kernels{6}=Gauss_1D(21.5);
+    parameters.kernels{7}=Gauss_1D(27);
+    parameters.kernels{8}=Gauss_1D(20.2);
+    parameters.kernels{9}=Gauss_1D(26);
+    parameters.kernels{10}=Gauss_1D(25.5);
     parameters.downsampleCoefficient = 10;
     
     len = floor(len/parameters.downsampleCoefficient);
@@ -52,7 +57,7 @@ if true || exist('initialized','var')==0 || initialized==false
     k=0;
     G=zeros(len*channelN*(channelN-1)/2,kerlen*channelN);
     Delta=generateCM([-1,2,-1],len,len);%Laplacian operator
-    %Dx=eye(len,len);%as no noise added,
+    Delta=eye(len,len);%as no noise added,
     for i=1:channelN-1
         for j=i+1:channelN
             G(k*len+1:(k+1)*len,(i-1)*kerlen+1:(i)*kerlen)=-Delta*Gi{j};
@@ -94,7 +99,7 @@ for k=1:kmax %控制迭代次数
     w=zeros(len,1);
     b=zeros(len,1);
     hUsed=h;
-    for j=1:15 %控制循环次数
+    for j=1:25 %控制循环次数
         ulast=u;
         u=linsolve(H'*H+alpha/gamma*(Dx'*Dx)+omega/gamma*eye(len),H'*g+alpha/gamma*Dx'*(v+a))+omega/gamma*(w+b);
         s=abs(Dx*u-a);
