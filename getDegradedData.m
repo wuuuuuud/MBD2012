@@ -1,0 +1,27 @@
+function [ degradedData ] = getDegradedData( originalData, parameters )
+%UNTITLED Summary of this function goes here
+%   Detailed explanation goes here
+switch parameters.type
+    case 'ConvolutionOnly'
+        channelN = parameters.channelNumber; %channel number
+        originalLength = length(originalData);
+        for i=1:channelN
+        end
+    case 'ConvolutionAndDownsample'
+        channelN = parameters.channelNumber; %channel number
+        originalLength = length(originalData);
+        downsampleCoefficient = parameters.downsampleCoefficient;
+        downsamplePhases = parameters.downsamplePhases;
+        degradedLength = floor(originalLength/downsampleCoefficient);
+        sensorKernels = parameters.sensorKernels;
+        kernels = parameters.kernels;
+        degradedData = zeros(degradedLength,channelN);
+        if isSingleSensorKernel(sensorKernels)
+            for i=1:channelN
+                degradedData(:,i) = getDownSampleMatrix(originalLength,degradedLength,downsampleCoefficient,downsamplePhases(i))*conv(conv(originalData,kernels{i},'same'),sensorKernels(:,1))';
+            end
+        end
+end
+
+end
+
