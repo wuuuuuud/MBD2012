@@ -1,5 +1,5 @@
 close all;
-if exist('initialized','var')==0 || initialized==false
+if true || exist('initialized','var')==0 || initialized==false
     %变量初始化
     
     disp('flag of initialized not found,initializing...');
@@ -11,10 +11,10 @@ if exist('initialized','var')==0 || initialized==false
     len=length(Y);
     kerlen=20;
     alpha=5000/15;
-    gamma=50000/15;
+    gamma=50000/10;
     delta=0.5e8/15;
     beta=0.5e9/15;
-    omega=5000/15;
+    omega=1000/15;
     
     channelN=5%通道数
     
@@ -22,7 +22,7 @@ if exist('initialized','var')==0 || initialized==false
     parameters.type = 'ConvolutionAndDownsample';
     parameters.channelNumber = channelN;
     parameters.downsamplePhases = [1,2,3,2,4];
-    parameters.sensorKernels=normalize([1,2,5,2,1]);
+    parameters.sensorKernels=normalize([1,1,1,1,1]);
     parameters.kernels=cell(5,1);
     parameters.kernels{1}=Gauss_1D(20);
     parameters.kernels{2}=Gauss_1D(23);
@@ -35,6 +35,7 @@ if exist('initialized','var')==0 || initialized==false
     ker=parameters.kernels;%每个卷积核长度不相同,所以用了cell
     
     degradedData = getDegradedData(Y,parameters);
+    figure;plot(degradedData);
     g=zeros(len*channelN,1);
     Gi=cell(channelN,1);
     u=zeros(len,1);
@@ -79,7 +80,7 @@ if exist('initialized','var')==0 || initialized==false
 end
 tick1=clock();
 %%循环迭代开始
-kmax=20; %
+kmax=5; %
 for k=1:kmax %控制迭代次数
     %%求解u
     for i=1:channelN
@@ -119,7 +120,6 @@ for k=1:kmax %控制迭代次数
     %             useeds(:,m)=ubuff(:,mod(m,20));
     %         end
     %     end
-    fig_u=plot(u);
     %%求解h
     w=zeros(channelN*kerlen,1);
     b=w;
@@ -146,7 +146,6 @@ for k=1:kmax %控制迭代次数
     end
     disp('h solver, time looped:');
     i-1
-    fig_h=plot(h);
     uhistory{k}=u;
     hhistory{k}=h;
     k
@@ -165,9 +164,8 @@ timeused=tick2-tick1;
 timeused(4)*3600+timeused(5)*60+timeused(6) %所用时间,
 figure;plot(G*h)
 figure;plot([H(1:len,:)*u,g(1:len)])
-figure;plot([H(len+1:2*len,:)*u,g(1+len:2*len)])
-figure;plot([H(2*len+1:3*len,:)*u,g(1+2*len:3*len)])
 figure;plot(u)
+figure;plot(h)
 for i=1:channelN
     H((i-1)*len+1:i*len,:)=generateCM(h((i-1)*kerlen+1:i*kerlen),len,len);
 end
